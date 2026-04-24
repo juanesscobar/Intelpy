@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IntelPY — Plataforma de Inteligencia Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #070A0E;
+  --bg2:    #0C1017;
+  --bg3:    #111820;
+  --bg4:    #17212E;
+  --line:   #1A2535;
+  --line2:  #233044;
+  --dim:    #3A5068;
+  --muted:  #7898B0;
+  --text:   #C8D8E8;
+  --white:  #EDF4FF;
+  --green:  #00E5A0;
+  --blue:   #2196FF;
+  --red:    #FF4466;
+  --amber:  #FFB800;
+  --purple: #9B6DFF;
+  --mono:   'JetBrains Mono', monospace;
+  --display:'Syne', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* GRID */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,229,160,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,.018) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;
+}
+
+/* SCANLINE EFFECT */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  pointer-events:none;z-index:1;
+}
+
+.z{position:relative;z-index:2}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--line);
+  background:rgba(7,10,14,.9);
+  backdrop-filter:blur(12px);
+  padding:0 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:52px;
+}
+.nav-logo{
+  font-family:var(--display);font-size:16px;font-weight:800;
+  color:var(--white);letter-spacing:-.02em;display:flex;align-items:center;gap:8px;
+}
+.nav-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+.nav-links{display:flex;gap:24px;}
+.nav-links a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.08em;text-transform:uppercase;transition:color .15s;}
+.nav-links a:hover{color:var(--green);}
+.nav-cta{
+  font-size:11px;font-family:var(--mono);font-weight:600;
+  padding:7px 16px;border-radius:4px;
+  background:var(--green);color:#000;
+  text-decoration:none;letter-spacing:.06em;text-transform:uppercase;
+  transition:opacity .15s;
+}
+.nav-cta:hover{opacity:.85;}
+
+/* HERO */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;
+  justify-content:center;padding:0 40px 0;
+  max-width:1160px;margin:0 auto;
+}
+.hero-eyebrow{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--green);margin-bottom:24px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before{content:'>';color:var(--green);}
+
+.hero-title{
+  font-family:var(--display);
+  font-size:clamp(42px,7vw,88px);
+  font-weight:800;line-height:.95;
+  letter-spacing:-.04em;color:var(--white);
+  margin-bottom:20px;
+}
+.hero-title .accent{color:var(--green);}
+.hero-title .dim{color:var(--dim);}
+
+.hero-sub{
+  font-size:14px;color:var(--muted);
+  max-width:520px;line-height:1.7;margin-bottom:40px;
+  border-left:2px solid var(--green);padding-left:16px;
+}
+
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{
+  font-family:var(--mono);font-size:12px;font-weight:600;
+  padding:12px 24px;border-radius:4px;
+  background:var(--green);color:#000;
+  text-decoration:none;letter-spacing:.06em;
+  transition:opacity .15s,transform .1s;display:inline-block;
+}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-outline{
+  font-family:var(--mono);font-size:12px;
+  padding:12px 24px;border-radius:4px;
+  border:1px solid var(--line2);color:var(--muted);
+  text-decoration:none;letter-spacing:.06em;
+  transition:border-color .15s,color .15s;display:inline-block;
+}
+.btn-outline:hover{border-color:var(--muted);color:var(--text);}
+
+/* TERMINAL BLOCK */
+.terminal{
+  background:var(--bg2);border:1px solid var(--line);
+  border-radius:8px;overflow:hidden;
+  max-width:640px;margin:60px auto 0;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,229,160,.06);
+  animation:floatup .6s ease both;
+}
+@keyframes floatup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.terminal-bar{
+  background:var(--bg3);border-bottom:1px solid var(--line);
+  padding:10px 16px;display:flex;align-items:center;gap:8px;
+}
+.t-dot{width:10px;height:10px;border-radius:50%;}
+.t-title{font-size:11px;color:var(--dim);margin-left:8px;flex:1;text-align:center;}
+.terminal-body{padding:20px 24px;font-size:12px;line-height:1.8;}
+.t-prompt{color:var(--green);}
+.t-cmd{color:var(--white);}
+.t-out{color:var(--muted);}
+.t-ok{color:var(--green);}
+.t-warn{color:var(--amber);}
+.t-err{color:var(--red);}
+.t-info{color:var(--blue);}
+.t-blank{height:6px;}
+
+/* SECTION */
+section{max-width:1160px;margin:0 auto;padding:80px 40px;}
+.section-tag{
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--green);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-tag span{color:var(--dim);}
+h2{
+  font-family:var(--display);font-size:clamp(28px,4vw,48px);
+  font-weight:800;letter-spacing:-.03em;
+  color:var(--white);margin-bottom:12px;line-height:1.05;
+}
+.section-desc{font-size:13px;color:var(--muted);max-width:480px;line-height:1.7;margin-bottom:40px;}
+
+/* PRODUCTS */
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:40px;}
+.product{background:var(--bg2);padding:28px;transition:background .2s;}
+.product:hover{background:var(--bg3);}
+.product-num{font-size:10px;color:var(--dim);letter-spacing:.12em;margin-bottom:16px;}
+.product-icon{font-size:24px;margin-bottom:12px;}
+.product-name{font-family:var(--display);font-size:18px;font-weight:700;color:var(--white);margin-bottom:6px;}
+.product-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:14px;}
+.product-tag{display:inline-block;font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:.08em;font-weight:600;}
+.tag-green{background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.2);}
+.tag-blue{background:rgba(33,150,255,.1);color:var(--blue);border:1px solid rgba(33,150,255,.2);}
+.tag-amber{background:rgba(255,184,0,.1);color:var(--amber);border:1px solid rgba(255,184,0,.2);}
+
+/* MODULES GRID */
+.modules{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+.module{
+  background:var(--bg2);border:1px solid var(--line);
+  border-radius:6px;padding:16px;
+  transition:border-color .2s,background .2s;cursor:default;
+}
+.module:hover{border-color:var(--line2);background:var(--bg3);}
+.module-icon{font-size:16px;margin-bottom:8px;}
+.module-name{font-size:11px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.module-tool{font-size:10px;color:var(--green);margin-bottom:6px;}
+.module-desc{font-size:10px;color:var(--muted);line-height:1.5;}
+.sev{display:inline-block;font-size:9px;padding:1px 6px;border-radius:2px;margin-top:6px;font-weight:600;}
+.sev-c{background:rgba(255,68,102,.12);color:var(--red);}
+.sev-h{background:rgba(255,184,0,.12);color:var(--amber);}
+.sev-m{background:rgba(33,150,255,.12);color:var(--blue);}
+
+/* STACK */
+.stack-layers{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.stack-layer{
+  display:grid;grid-template-columns:160px 1fr;
+  background:var(--bg2);
+  transition:background .15s;
+}
+.stack-layer:hover{background:var(--bg3);}
+.layer-label{
+  padding:16px 20px;border-right:1px solid var(--line);
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;
+}
+.layer-content{padding:16px 20px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.chip{
+  font-size:10px;padding:3px 10px;border-radius:4px;
+  border:1px solid var(--line2);background:var(--bg4);color:var(--text);
+  font-family:var(--mono);
+}
+.chip.py{border-color:rgba(59,130,246,.3);color:#60A5FA;background:rgba(59,130,246,.06);}
+.chip.node{border-color:rgba(0,229,160,.3);color:var(--green);background:rgba(0,229,160,.06);}
+.chip.infra{border-color:rgba(255,184,0,.3);color:var(--amber);background:rgba(255,184,0,.06);}
+.chip.db{border-color:rgba(155,109,255,.3);color:var(--purple);background:rgba(155,109,255,.06);}
+.chip.osint{border-color:rgba(255,68,102,.3);color:var(--red);background:rgba(255,68,102,.06);}
+
+/* KALI SECTION */
+.kali-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px;}
+.kali-card{background:var(--bg2);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.kali-card-head{padding:14px 20px;border-bottom:1px solid var(--line);font-size:11px;font-weight:600;color:var(--white);display:flex;align-items:center;gap:8px;}
+.kali-card-head .dot{width:6px;height:6px;border-radius:50%;}
+.kali-card-body{padding:20px;font-size:11px;line-height:2;}
+.cmd-line{display:flex;gap:8px;}
+.cmd-prompt{color:var(--green);flex-shrink:0;}
+.cmd-text{color:var(--white);}
+.cmd-comment{color:var(--dim);}
+
+/* CLIENTS */
+.clients-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.client{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:16px;transition:border-color .2s;}
+.client:hover{border-color:var(--line2);}
+.client-sector{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;}
+.client-name{font-size:12px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.client-why{font-size:10px;color:var(--muted);line-height:1.5;}
+.client-price{font-size:10px;color:var(--green);margin-top:8px;font-weight:600;}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--line);margin:0 40px;}
+
+/* FLOW */
+.flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;padding:32px 0;}
+.flow-step{
+  background:var(--bg3);border:1px solid var(--line2);
+  border-radius:6px;padding:12px 16px;text-align:center;
+  min-width:110px;
+}
+.flow-icon{font-size:18px;margin-bottom:4px;}
+.flow-name{font-size:10px;font-weight:600;color:var(--white);}
+.flow-sub{font-size:9px;color:var(--dim);margin-top:2px;}
+.flow-arrow{font-size:14px;color:var(--dim);padding:0 6px;}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--line);
+  padding:32px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:var(--dim);
+  max-width:1160px;margin:0 auto;
+}
+.footer-logo{font-family:var(--display);font-size:14px;font-weight:800;color:var(--muted);}
+
+/* BADGES ROW */
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px;}
+.badge{font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--line2);color:var(--muted);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .hero{padding:60px 20px 0;}
+  section{padding:60px 20px;}
+  .products{grid-template-columns:1fr;}
+  .modules{grid-template-columns:repeat(2,1fr);}
+  .kali-grid{grid-template-columns:1fr;}
+  .clients-grid{grid-template-columns:1fr 1fr;}
+  .flow{gap:4px;}.flow-arrow{display:none;}
+}
+
+/* ANIMATIONS */
+.fade-in{animation:fadeIn .5s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.delay-1{animation-delay:.1s}
+.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="z">
+  <div class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    IntelPY
+  </div>
+  <div class="nav-links">
+    <a href="#productos">Productos</a>
+    <a href="#vulnscan">VulnScan</a>
+    <a href="#stack">Stack</a>
+    <a href="#kali">Desarrollo</a>
+    <a href="#clientes">Clientes</a>
+  </div>
+  <a href="mailto:contacto@intelpy.com.py" class="nav-cta">Contacto</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero z fade-in">
+  <div class="hero-eyebrow">IntelPY · Intelligence Platform · Paraguay</div>
+  <h1 class="hero-title">
+    Inteligencia<br>
+    <span class="accent">digital</span><br>
+    <span class="dim">para Paraguay.</span>
+  </h1>
+  <p class="hero-sub">
+    OSINT corporativo, análisis de vulnerabilidades automático y crédito personal — tres productos en una plataforma construida en Python para el mercado paraguayo.
+  </p>
+  <div class="hero-actions">
+    <a href="#productos" class="btn-primary">Ver productos</a>
+    <a href="#stack" class="btn-outline">Stack técnico</a>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="t-dot" style="background:#FF5F57;"></div>
+      <div class="t-dot" style="background:#FFBD2E;"></div>
+      <div class="t-dot" style="background:#28C940;"></div>
+      <span class="t-title">intelpy@kali ~ vulnscan</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-prompt">$</span> <span class="t-cmd">intelpy scan --target banco-xyz.com.py --plan pro</span></div>
+      <div class="t-blank"></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">Autorización verificada · Iniciando 8 módulos en paralelo</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">[recon]      14 subdominios descubiertos</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">[ports]      3 servicios expuestos a internet</span></div>
+      <div><span class="t-warn">!</span> <span class="t-out">[email]      DMARC ausente → riesgo de phishing directo</span></div>
+      <div><span class="t-err">✗</span> <span class="t-out">[web]        CVE-2024-1234 encontrado en panel admin</span></div>
+      <div><span class="t-warn">!</span> <span class="t-out">[leaks]      4 emails corporativos en breaches públicos</span></div>
+      <div><span class="t-ok">✓</span> <span class="t-out">[ssl]        TLS 1.3 · Certificado válido</span></div>
+      <div class="t-blank"></div>
+      <div><span class="t-info">→</span> <span class="t-out">Risk Score: <span class="t-warn">61/100</span> · 2 críticos · 4 altos · 7 medios</span></div>
+      <div><span class="t-info">→</span> <span class="t-out">Reporte PDF generado → <span class="t-ok">reporte_banco-xyz_20250424.pdf</span></span></div>
+      <div><span class="t-info">→</span> <span class="t-out">Notificación enviada por Telegram</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- PRODUCTOS -->
+<section id="productos" class="z">
+  <div class="section-tag">01 <span>// products</span></div>
+  <h2>Tres productos.<br>Un ecosistema.</h2>
+  <p class="section-desc">Construidos para el mercado paraguayo, con datos locales y soporte en español.</p>
+  <div class="products">
+    <div class="product">
+      <div class="product-num">PRODUCT · 01</div>
+      <div class="product-icon">🔍</div>
+      <div class="product-name">IntelPY Business</div>
+      <div class="product-desc">OSINT corporativo: investigación de personas, empresas, dominios y case management. Para estudios jurídicos, RRHH y due diligence.</div>
+      <span class="product-tag tag-green">B2B · SaaS mensual</span>
+    </div>
+    <div class="product">
+      <div class="product-num">PRODUCT · 02</div>
+      <div class="product-icon">📊</div>
+      <div class="product-name">IntelPY Score</div>
+      <div class="product-desc">El primer servicio en Paraguay donde cualquier persona puede consultar y monitorear su propio historial crediticio. Alternativa accesible a Inforconf.</div>
+      <span class="product-tag tag-amber">B2C · Pay-per-use</span>
+    </div>
+    <div class="product">
+      <div class="product-num">PRODUCT · 03</div>
+      <div class="product-icon">🛡️</div>
+      <div class="product-name">IntelPY VulnScan</div>
+      <div class="product-desc">Análisis automático de vulnerabilidades externas. 8 módulos en paralelo, reporte PDF ejecutivo y Score de riesgo 0–100. Sin instalar nada en el cliente.</div>
+      <span class="product-tag tag-blue">B2B · Retainer mensual</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- VULNSCAN MÓDULOS -->
+<section id="vulnscan" class="z">
+  <div class="section-tag">02 <span>// vulnscan · modules</span></div>
+  <h2>8 módulos.<br>Escaneo automático.</h2>
+  <p class="section-desc">El cliente nos da su dominio. El sistema escanea en 24–48h y entrega un reporte con vulnerabilidades reales clasificadas por severidad.</p>
+
+  <div class="flow">
+    <div class="flow-step"><div class="flow-icon">🌐</div><div class="flow-name">Input</div><div class="flow-sub">Dominio / IP</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">⚡</div><div class="flow-name">Celery</div><div class="flow-sub">8 workers paralelos</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">📊</div><div class="flow-name">Score</div><div class="flow-sub">0–100 riesgo</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">📄</div><div class="flow-name">PDF</div><div class="flow-sub">Reporte ejecutivo</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">📱</div><div class="flow-name">Alerta</div><div class="flow-sub">Telegram / email</div></div>
+  </div>
+
+  <div class="modules">
+    <div class="module">
+      <div class="module-icon">🌐</div>
+      <div class="module-name">Reconocimiento</div>
+      <div class="module-tool">Amass · subfinder · httpx</div>
+      <div class="module-desc">Subdominios activos, tecnologías detectadas, superficie de ataque completa.</div>
+      <span class="sev sev-h">Alto impacto</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">🔌</div>
+      <div class="module-name">Puertos expuestos</div>
+      <div class="module-tool">Nmap · Shodan API</div>
+      <div class="module-desc">RDP, SSH, MySQL, paneles admin abiertos a internet sin protección.</div>
+      <span class="sev sev-c">Crítico frecuente</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">💉</div>
+      <div class="module-name">OWASP Web</div>
+      <div class="module-tool">Nuclei · 9000+ templates</div>
+      <div class="module-desc">SQL injection, XSS, paneles sin auth, archivos sensibles expuestos.</div>
+      <span class="sev sev-c">Crítico</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">📧</div>
+      <div class="module-name">Email Security</div>
+      <div class="module-tool">dnspython · MXToolbox</div>
+      <div class="module-desc">SPF, DKIM, DMARC ausente — permite phishing usando el dominio de la empresa.</div>
+      <span class="sev sev-h">Muy común en PY</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">🔐</div>
+      <div class="module-name">SSL / TLS</div>
+      <div class="module-tool">SSLyze</div>
+      <div class="module-desc">Certificados vencidos, algoritmos débiles, versiones obsoletas (TLS 1.0/1.1).</div>
+      <span class="sev sev-m">Medio</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">📨</div>
+      <div class="module-name">Credenciales filtradas</div>
+      <div class="module-tool">HIBP · Hunter.io</div>
+      <div class="module-desc">Emails corporativos en data breaches públicos. Riesgo de acceso no autorizado.</div>
+      <span class="sev sev-h">Alto</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">☁️</div>
+      <div class="module-name">Cloud & Repos</div>
+      <div class="module-tool">TruffleHog · gitleaks</div>
+      <div class="module-desc">API keys y secrets en repositorios GitHub/GitLab públicos de la empresa.</div>
+      <span class="sev sev-c">Crítico cuando aparece</span>
+    </div>
+    <div class="module">
+      <div class="module-icon">📊</div>
+      <div class="module-name">Risk Score</div>
+      <div class="module-tool">Algoritmo propio IntelPY</div>
+      <div class="module-desc">Score 0–100 consolidado. 100 = máximo riesgo. Comparable en el tiempo.</div>
+      <span class="sev" style="background:rgba(0,229,160,.1);color:var(--green);">Entregable clave</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- STACK -->
+<section id="stack" class="z">
+  <div class="section-tag">03 <span>// tech stack</span></div>
+  <h2>Python-first.<br>Diseñado para escalar.</h2>
+  <p class="section-desc">Stack moderno, containerizado y reproducible. Corre en Kali para desarrollo y en Hetzner para producción.</p>
+
+  <div class="stack-layers">
+    <div class="stack-layer">
+      <div class="layer-label" style="color:var(--green);">Frontend</div>
+      <div class="layer-content">
+        <span class="chip node">Next.js 14</span>
+        <span class="chip node">TypeScript</span>
+        <span class="chip node">Tailwind CSS</span>
+        <span class="chip node">shadcn/ui</span>
+        <span class="chip node">Recharts</span>
+        <span class="chip node">React Query</span>
+        <span class="chip node">Zustand</span>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="layer-label" style="color:var(--blue);">API Backend</div>
+      <div class="layer-content">
+        <span class="chip py">FastAPI 0.115</span>
+        <span class="chip py">Python 3.12</span>
+        <span class="chip py">Pydantic v2</span>
+        <span class="chip py">SQLAlchemy 2</span>
+        <span class="chip py">JWT Auth</span>
+        <span class="chip py">WebSockets</span>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="layer-label" style="color:var(--amber);">Task Queue</div>
+      <div class="layer-content">
+        <span class="chip py">Celery 5.4</span>
+        <span class="chip py">RedBeat</span>
+        <span class="chip infra">4 colas separadas</span>
+        <span class="chip infra">chord pattern</span>
+        <span class="chip infra">Flower monitor</span>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="layer-label" style="color:var(--purple);">Base de datos</div>
+      <div class="layer-content">
+        <span class="chip db">PostgreSQL 16</span>
+        <span class="chip db">pgvector</span>
+        <span class="chip db">Redis 7</span>
+        <span class="chip db">Alembic</span>
+        <span class="chip db">Row-Level Security</span>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="layer-label" style="color:var(--red);">OSINT Engines</div>
+      <div class="layer-content">
+        <span class="chip osint">Nuclei</span>
+        <span class="chip osint">Nmap</span>
+        <span class="chip osint">Shodan API</span>
+        <span class="chip osint">Amass</span>
+        <span class="chip osint">subfinder</span>
+        <span class="chip osint">SSLyze</span>
+        <span class="chip osint">HIBP API</span>
+        <span class="chip osint">TruffleHog</span>
+        <span class="chip osint">Playwright</span>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="layer-label" style="color:var(--amber);">Infraestructura</div>
+      <div class="layer-content">
+        <span class="chip infra">Docker Compose</span>
+        <span class="chip infra">Nginx</span>
+        <span class="chip infra">Hetzner VPS</span>
+        <span class="chip infra">Cloudflare</span>
+        <span class="chip infra">GitHub Actions</span>
+        <span class="chip infra">Sentry</span>
+        <span class="chip infra">WeasyPrint PDF</span>
+        <span class="chip infra">Bancard PY</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- KALI SETUP -->
+<section id="kali" class="z">
+  <div class="section-tag">04 <span>// development · kali linux</span></div>
+  <h2>Corre en Kali.<br>Deploy en Hetzner.</h2>
+  <p class="section-desc">Kali Linux es el ambiente de desarrollo ideal — trae Nmap, Amass y herramientas de red preinstaladas. Docker para todo lo demás.</p>
+
+  <div class="kali-grid">
+    <div class="kali-card">
+      <div class="kali-card-head">
+        <div class="dot" style="background:var(--green);"></div>
+        Setup inicial en Kali (una vez)
+      </div>
+      <div class="kali-card-body">
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">git clone https://github.com/user/intelpy</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">cd intelpy && cp .env.example .env</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># Instalar herramientas OSINT</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># Docker + servicios</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">make dev && make migrate</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--green);">✓</span><span class="cmd-text" style="color:var(--green);"> IntelPY corriendo en localhost:3000</span></div>
+      </div>
+    </div>
+
+    <div class="kali-card">
+      <div class="kali-card-head">
+        <div class="dot" style="background:var(--blue);"></div>
+        Workflow diario de desarrollo
+      </div>
+      <div class="kali-card-body">
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># Solo DB y Redis en Docker</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">docker compose up -d db redis</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># FastAPI con hot-reload</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">uvicorn app.main:app --reload --port 8000</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># Worker Celery en otra terminal</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">celery -A app.worker.celery_app worker \</span></div>
+        <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  --loglevel=info -Q cyber,osint,credit,default</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">cd frontend && npm run dev</span></div>
+      </div>
+    </div>
+
+    <div class="kali-card">
+      <div class="kali-card-head">
+        <div class="dot" style="background:var(--amber);"></div>
+        Test de escaneo desde línea de comandos
+      </div>
+      <div class="kali-card-body">
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># Iniciar escaneo via API</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">http POST :8000/api/v1/scans \</span></div>
+        <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  target=objetivo.com.py \</span></div>
+        <div class="cmd-line"><span class="cmd-prompt"> </span><span class="cmd-text">  modules:='["recon","ports","email","ssl"]'</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--blue);">→</span><span class="cmd-text"> { "task_id": "abc-123", "status": "queued" }</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># Polling de resultado</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">http GET :8000/api/v1/scans/abc-123</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">make logs-worker</span></div>
+      </div>
+    </div>
+
+    <div class="kali-card">
+      <div class="kali-card-head">
+        <div class="dot" style="background:var(--purple);"></div>
+        Deploy a producción (Hetzner)
+      </div>
+      <div class="kali-card-body">
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-comment"># GitHub Actions hace el deploy automático</span></div>
+        <div class="cmd-line"><span class="cmd-prompt">$</span><span class="cmd-text">git push origin main</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--green);">✓</span><span class="cmd-text"> CI tests pasan</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--green);">✓</span><span class="cmd-text"> SSH deploy a VPS Hetzner</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--green);">✓</span><span class="cmd-text"> docker compose pull && up -d</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--green);">✓</span><span class="cmd-text"> alembic upgrade head</span></div>
+        <div class="cmd-line"><span class="cmd-prompt" style="color:var(--green);">✓</span><span class="cmd-text"> Notificación Telegram al founder</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CLIENTES -->
+<section id="clientes" class="z">
+  <div class="section-tag">05 <span>// target clients · paraguay</span></div>
+  <h2>Mercado real.<br>Clientes reales.</h2>
+  <p class="section-desc">Segmento medio-alto paraguayo. Empresas con presencia digital que no tienen equipo de seguridad interno.</p>
+
+  <div class="clients-grid">
+    <div class="client">
+      <div class="client-sector">Banca</div>
+      <div class="client-name">Banco Itaú, Continental, Sudameris</div>
+      <div class="client-why">Regulados por BCP. Alta infraestructura digital. Obligados a auditorías de seguridad.</div>
+      <div class="client-price">VulnScan Enterprise · USD 1,600+/mes</div>
+    </div>
+    <div class="client">
+      <div class="client-sector">Cooperativas</div>
+      <div class="client-name">Chortitzer, Colonias Unidas, tipo A</div>
+      <div class="client-why">Activos USD 3,359M. Sin CISO propio. Mercado virgen en ciberseguridad.</div>
+      <div class="client-price">VulnScan Pro · USD 530/mes</div>
+    </div>
+    <div class="client">
+      <div class="client-sector">Salud</div>
+      <div class="client-name">Clínicas privadas · Farmacias</div>
+      <div class="client-why">Datos de pacientes = objetivo premium de ransomware. Regulación creciente.</div>
+      <div class="client-price">VulnScan Pro · USD 530/mes</div>
+    </div>
+    <div class="client">
+      <div class="client-sector">Legal</div>
+      <div class="client-name">Estudios jurídicos CDE / Asunción</div>
+      <div class="client-why">Due diligence de personas y empresas. Investigaciones con OSINT.</div>
+      <div class="client-price">IntelPY Business · USD 200/mes</div>
+    </div>
+    <div class="client">
+      <div class="client-sector">Industria</div>
+      <div class="client-name">Importadoras Alto Paraná</div>
+      <div class="client-why">Sistemas ERP conectados. Tu ventaja geográfica en CDE.</div>
+      <div class="client-price">VulnScan Starter · USD 200</div>
+    </div>
+    <div class="client">
+      <div class="client-sector">Personas</div>
+      <div class="client-name">Cualquier ciudadano paraguayo</div>
+      <div class="client-why">Primer acceso público a historial crediticio en PY. Inforconf no lo ofrece.</div>
+      <div class="client-price">IntelPY Score · USD 5/consulta</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="z">
+  <div class="footer-logo">IntelPY</div>
+  <div style="font-size:11px;color:var(--dim);">Ciudad del Este, Paraguay 🇵🇾 · © 2025</div>
+  <a href="mailto:contacto@intelpy.com.py" style="font-size:11px;color:var(--green);text-decoration:none;">contacto@intelpy.com.py</a>
+</footer>
+
+</body>
+</html>
