@@ -360,5 +360,5 @@ No se permite la redistribución, copia o uso comercial sin autorización expres
 
 <div align="center">
   <strong>IntelPY</strong> · Ciudad del Este, Paraguay 🇵🇾<br>
-  <a href="mailto:contacto@intelpy.com.py">contacto@intelpy.com.py</a>
+  <a href="mailto:contacto@intelpy.com.py">escobarbvega.juanandres21@gmail.com - +595 973 640 191</a>
 </div>
